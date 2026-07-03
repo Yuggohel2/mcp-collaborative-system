@@ -21,3 +21,8 @@ To optimize native performance and stay strictly within the 8% remaining Gemini 
 ## 4. Summarization and Verification
 - **Rule**: When OpenHands finishes, only request the final diff and a brief test pass summary. Do not output raw build logs or stack traces to the main chat.
 - **Rule**: Use the `code-review-graph` to review changes post-implementation to ensure architectural integrity.
+
+## 5. Automatic Session State Persistence
+- **Rule**: At the end of every execution phase, or whenever pausing/ending a task, the agent MUST automatically update the `task.md` file in the conversation artifacts directory.
+- **Rule**: The update must detail completed tasks `[x]`, in-progress tasks `[/]`, and clearly state where the work was stopped so that a fresh conversation session can resume immediately without manual user explanation.
+
