@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "github-mcp-server": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "-e",
+        "GITHUB_PERSONAL_ACCESS_TOKEN",
+        "ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "<INSERT_YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>"
+      }
+    },
+    "code-review-graph": {
+      "command": "code-review-graph",
+      "args": [
+        "serve",
+        "--auto-watch"
+      ]
+    },
+    "openhands": {
+      "command": "uv",
+      "args": [
+        "run",
+        "<DETECTED_WORKSPACE_PATH>/infrastructure/openhands_mcp.py"
+      ]
+    }
+  }
+}
