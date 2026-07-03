@@ -126,3 +126,32 @@ Please help me bootstrap my local MCP Collaborative System. Follow these steps t
 Verify the configuration once complete and confirm when we are ready to build!
 ```
 
+
+---
+
+## 🧪 Verifying Your Installation
+
+Once you have completed the onboarding setup, you can test that the entire system (Brain + Graph + Hands) is working together correctly by using the following verification challenge.
+
+### The Verification Challenge Prompt:
+Copy and paste this prompt into your agentic chat window:
+
+```markdown
+Let's run a verification test for our MCP Collaborative System. Please execute the following steps:
+
+1. Create a new directory in our workspace called `verification_test`.
+2. Inside it, create a Python script with a deliberate logic bug (e.g., a function that is supposed to calculate fibonacci numbers but has an incorrect recursion base case).
+3. Use the `code-review-graph` tools to index the new directory and locate the code.
+4. Delegate the task of fixing the bug and running a unit test validation to the `openhands` server.
+5. Once fixed and tested, output a summary report showing:
+   - The original broken code vs. the fixed code.
+   - The verification test status.
+   - An estimate of the token context saved by using the graph-targeted lookup rather than passing the whole file/directory into the context window.
+```
+
+### Expected Results:
+If the setup is fully functional, your agent will:
+1. Automatically write the broken script.
+2. Query the graph to register/index it.
+3. Call `openhands.run_task` to spin up a sandboxed execution, correct the logic, and write a verification test.
+4. Output a summary report showing the fix and demonstrating the token efficiency gains of the system (typically saving 80% to 95% of context window tokens compared to standard, full-file reading).
