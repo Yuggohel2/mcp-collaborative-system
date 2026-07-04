@@ -5,12 +5,27 @@ An ultra-efficient, highly collaborative agentic coding framework built using th
 
 ## 📐 System Architecture
 
+<style>
+  @keyframes flowchart-dash {
+    to {
+      stroke-dashoffset: -20;
+    }
+  }
+  .mermaid svg .edgePath path,
+  .mermaid svg .edgePaths path,
+  .mermaid svg .edgePath .path,
+  .mermaid svg path.edgePath,
+  .mermaid svg .flowchart-link,
+  .mermaid svg .edgePaths .edgePath {
+    stroke: #2b6cb0 !important;
+    stroke-width: 3px !important;
+    stroke-dasharray: 5 !important;
+    animation: flowchart-dash 1s linear infinite !important;
+  }
+</style>
+
 ```mermaid
 flowchart TB
-    %% Inject CSS animation directly inside the SVG DOM to bypass GitHub/IDE sandboxing
-    styleNode["<style>@keyframes dash { to { stroke-dashoffset: -20; } }</style>"]
-    style styleNode fill:none,stroke:none,width:0,height:0,color:transparent,display:none;
-
     subgraph Host ["💻 Host Machine (Local Workspace)"]
         direction TB
         Brain["🧠 IDE Chat Agent (The Brain)"]
@@ -21,15 +36,18 @@ flowchart TB
         Hands["⚙️ OpenHands Sandbox (The Hands)"]
     end
 
-    Brain -->|1. Target Context| Graph
-    Brain -->|2. Delegate Execution| Hands
-    Hands -->|3. Intercept LLM Calls| Proxy
-    Proxy -->|4. Return Local Response| Brain
+    Brain -->|"1. Target Context"| Graph
+    Brain -->|"2. Delegate Execution"| Hands
+    Hands -->|"3. Intercept LLM Calls"| Proxy
+    Proxy -->|"4. Return Local Response"| Brain
 
-    linkStyle 2 stroke:#2b6cb0,stroke-width:3px,stroke-dasharray:5,animation:dash 1s linear infinite;
-    linkStyle 3 stroke:#2b6cb0,stroke-width:3px,stroke-dasharray:5,animation:dash 1s linear infinite;
-    linkStyle 4 stroke:#2b6cb0,stroke-width:3px,stroke-dasharray:5,animation:dash 1s linear infinite;
-    linkStyle 5 stroke:#2b6cb0,stroke-width:3px,stroke-dasharray:5,animation:dash 1s linear infinite;
+    style Brain fill:#ebf8ff,stroke:#2b6cb0,stroke-width:2px
+    style Graph fill:#e6fffa,stroke:#319795,stroke-width:2px
+    style Proxy fill:#ebf4ff,stroke:#4c51bf,stroke-width:2px
+    style Hands fill:#fffaf0,stroke:#dd6b20,stroke-width:2px
+    
+    style Host fill:#f8fafc,stroke:#cbd5e0,stroke-width:2px
+    style Sandbox fill:#f8fafc,stroke:#cbd5e0,stroke-width:2px
 ```
 
 ---
