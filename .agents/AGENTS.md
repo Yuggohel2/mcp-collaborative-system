@@ -31,9 +31,16 @@ To optimize native performance and stay strictly within the 8% remaining Gemini 
 - **Rule**: The verification test/challenge (specified in `README.md`) must only be run once to verify the initial system installation. If the user prompts to run the verification test, the agent must check if the `verification_test` directory already exists and has been successfully resolved. If it has, the agent must inform the user that the system is already verified and skip running it again.
 
 
+
 ## 6. Automatic Session State Persistence
-- **Rule**: At the end of every execution phase, or whenever pausing/ending a task, the agent MUST automatically update the `task.md` file in the conversation artifacts directory.
+- **Rule**: The agent MUST automatically maintain and update the `task.md` state at the end of every execution phase, or whenever pausing/ending a task.
+- **Rule**: **Inside Project Folder:** If the work is occurring inside a specific project folder (under `PROJECTS_DIR`), the agent MUST create/update the `task.md` directly in that active project's root folder so that each project retains its own persistent memory. The global conversation-level `task.md` should not be used or updated in this case.
+- **Rule**: **Outside Project Folder:** If the work is occurring outside or above the projects folder (such as configuring workspace-level MCP servers, editing rulebooks, or updating global configuration files), the agent MUST create/update a global `task.md` in the conversation artifacts directory (e.g., `<appDataDir>\brain\<conversation-id>\task.md`).
+- **Rule**: **Inside the PROJECTS_DIR Root:** If the work is occurring directly in the parent container/projects directory itself (and not inside a specific project subfolder), neither the global nor the project-specific `task.md` should be updated.
 - **Rule**: The update must detail completed tasks `[x]`, in-progress tasks `[/]`, and clearly state where the work was stopped so that a fresh conversation session can resume immediately without manual user explanation.
+
+
+
 
 ## 7. Docker Cleanup Shortcut
 - **Rule**: If the user instructs to "run docker cleanup command", the agent must run the following PowerShell command in the workspace:
@@ -43,4 +50,6 @@ To optimize native performance and stay strictly within the 8% remaining Gemini 
 ## 8. GitHub Push Constraint
 - **Rule**: Do NOT push code changes to the GitHub repository automatically.
 - **Rule**: Only push changes to the remote GitHub repository when the user explicitly instructs you to do so.
+
+
 

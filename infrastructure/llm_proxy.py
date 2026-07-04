@@ -6,7 +6,7 @@ import time
 from pathlib import Path
 
 PORT = 9999
-USER_DIR = Path("C:/Users/yug")
+USER_DIR = Path.home()
 OPENHANDS_DIR = USER_DIR / ".openhands"
 REQUEST_FILE = OPENHANDS_DIR / "llm_request.json"
 RESPONSE_FILE = OPENHANDS_DIR / "llm_response.json"
