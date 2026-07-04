@@ -151,7 +151,8 @@ def run_server():
             break
         except OSError as e:
             # Check for "Address already in use" errors (98 on Unix, 10048 on Windows)
-            if e.errno in (98, 10048):
+            err_msg = str(e).lower()
+            if e.errno in (98, 10048) or "in use" in err_msg or "already bound" in err_msg:
                 print(f"[Proxy] Port {port} is busy. Trying {port - 1}...")
                 port -= 1
                 if port < 1024:
