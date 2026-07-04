@@ -8,12 +8,13 @@ An ultra-efficient, highly collaborative agentic coding framework built using th
 ```mermaid
 flowchart TB
     subgraph Host ["💻 Host Machine (Local Workspace)"]
-        direction TB
+        direction LR
         Brain["🧠 IDE Chat Agent (The Brain)"]
-        Graph["🧩 code-review-graph (The Graph)"]
         Proxy["🌉 LLM Local Proxy (The Bridge)"]
+        Graph["🧩 code-review-graph (The Graph)"]
     end
     subgraph Sandbox ["🛡️ Docker Sandbox (Execution)"]
+        direction LR
         Hands["⚙️ OpenHands Sandbox (The Hands)"]
     end
 
@@ -22,13 +23,13 @@ flowchart TB
     Hands -->|"3. Intercept LLM Calls"| Proxy
     Proxy -->|"4. Return Local Response"| Brain
 
-    style Brain fill:#ebf8ff,stroke:#2b6cb0,stroke-width:2px
+    style Brain fill:#ebf8ff,stroke:#3182ce,stroke-width:2px
     style Graph fill:#e6fffa,stroke:#319795,stroke-width:2px
     style Proxy fill:#ebf4ff,stroke:#4c51bf,stroke-width:2px
-    style Hands fill:#fffaf0,stroke:#dd6b20,stroke-width:2px
+    style Hands fill:#fff5f5,stroke:#e53e3e,stroke-width:2px
     
     style Host fill:#f8fafc,stroke:#cbd5e0,stroke-width:2px
-    style Sandbox fill:#f8fafc,stroke:#cbd5e0,stroke-width:2px
+    style Sandbox fill:#fffaf0,stroke:#feebc8,stroke-width:2px
 ```
 
 ---
