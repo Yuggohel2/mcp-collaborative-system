@@ -25,24 +25,41 @@ mcp = FastMCP("openhands")
 
 OPENHANDS_URL = os.getenv("OPENHANDS_URL", "http://localhost:8000")
 
+_LAST_API_KEY = None
+
 def get_api_key() -> str:
     """Dynamically retrieve the OpenHands session API key."""
+    global _LAST_API_KEY
+    key = None
+    
     # 1. Try environment variables
-    key = os.getenv("OPENHANDS_API_KEY") or os.getenv("SESSION_API_KEY")
-    if key:
-        return key.strip()
+    key_env = os.getenv("OPENHANDS_API_KEY") or os.getenv("SESSION_API_KEY")
+    if key_env:
+        key = key_env.strip()
 
     # 2. Resolve default path: ~/.openhands/agent-canvas/api-key.txt
-    try:
-        home = Path.home()
-        key_file = home / ".openhands" / "agent-canvas" / "api-key.txt"
-        if key_file.exists():
-            return key_file.read_text(encoding="utf-8").strip()
-    except Exception as e:
-        logger.error(f"Failed to read api-key.txt: {e}")
+    if not key:
+        try:
+            home = Path.home()
+            key_file = home / ".openhands" / "agent-canvas" / "api-key.txt"
+            if key_file.exists():
+                key = key_file.read_text(encoding="utf-8").strip()
+        except Exception as e:
+            logger.error(f"Failed to read api-key.txt: {e}")
 
     # Fallback/Error
-    raise ValueError("OpenHands API Key could not be resolved from environment or ~/.openhands/agent-canvas/api-key.txt")
+    if not key:
+        raise ValueError("OpenHands API Key could not be resolved from environment or ~/.openhands/agent-canvas/api-key.txt")
+
+    # Logging on rotation
+    if key != _LAST_API_KEY:
+        if _LAST_API_KEY is not None:
+            logger.info(f"OpenHands API key rotated dynamically. New key prefix: {key[:8]}...")
+        else:
+            logger.info(f"Dynamically loaded OpenHands API key. Key prefix: {key[:8]}...")
+        _LAST_API_KEY = key
+
+    return key
 
 def get_headers() -> dict:
     """Construct headers for API requests."""

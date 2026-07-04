@@ -4,12 +4,45 @@ import json
 import os
 import time
 from pathlib import Path
+from typing import Any
 
 PORT = 9999
 USER_DIR = Path.home()
 OPENHANDS_DIR = USER_DIR / ".openhands"
 REQUEST_FILE = OPENHANDS_DIR / "llm_request.json"
 RESPONSE_FILE = OPENHANDS_DIR / "llm_response.json"
+
+def safe_write_json(file_path: Path, data: Any):
+    """Write JSON file with safety retries to prevent Windows locking/access errors."""
+    for i in range(5):
+        try:
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+            return
+        except (PermissionError, IOError):
+            time.sleep(0.1)
+    raise IOError(f"Failed to write file {file_path} after multiple retries.")
+
+def safe_read_json(file_path: Path) -> Any:
+    """Read JSON file with safety retries to prevent Windows locking/access errors."""
+    for i in range(5):
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (PermissionError, IOError, json.JSONDecodeError):
+            time.sleep(0.1)
+    raise IOError(f"Failed to read file {file_path} after multiple retries.")
+
+def safe_unlink(file_path: Path):
+    """Delete a file with safety retries to prevent Windows locking/access errors."""
+    if not file_path.exists():
+        return
+    for i in range(5):
+        try:
+            file_path.unlink()
+            return
+        except (PermissionError, IOError):
+            time.sleep(0.1)
 
 class LLMProxyHandler(http.server.BaseHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -40,15 +73,18 @@ class LLMProxyHandler(http.server.BaseHTTPRequestHandler):
             # Ensure directory exists
             OPENHANDS_DIR.mkdir(parents=True, exist_ok=True)
             
-            # Clean up old files if they exist
-            if REQUEST_FILE.exists():
-                REQUEST_FILE.unlink()
-            if RESPONSE_FILE.exists():
-                RESPONSE_FILE.unlink()
+            # Clean up old files if they exist to prevent reading stale requests
+            safe_unlink(REQUEST_FILE)
+            safe_unlink(RESPONSE_FILE)
 
-            # Save request to file
-            with open(REQUEST_FILE, "w", encoding="utf-8") as f:
-                json.dump(payload, f, indent=2)
+            # Save request to file safely
+            try:
+                safe_write_json(REQUEST_FILE, payload)
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(f"Failed to write request file: {e}".encode())
+                return
             
             print(f"[Proxy] Saved request to {REQUEST_FILE}. Waiting for orchestrator response...")
 
@@ -62,11 +98,10 @@ class LLMProxyHandler(http.server.BaseHTTPRequestHandler):
                     try:
                         # Add a tiny delay to ensure file write is completed by orchestrator
                         time.sleep(0.1)
-                        with open(RESPONSE_FILE, "r", encoding="utf-8") as f:
-                            response_data = json.load(f)
-                        RESPONSE_FILE.unlink()
+                        response_data = safe_read_json(RESPONSE_FILE)
+                        safe_unlink(RESPONSE_FILE)
                         break
-                    except Exception as e:
+                    except Exception:
                         time.sleep(0.2)
                 time.sleep(0.5)
 
@@ -97,12 +132,29 @@ class LLMProxyHandler(http.server.BaseHTTPRequestHandler):
 def run_server():
     # Allow address reuse to prevent "Address already in use" errors on restarts
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("0.0.0.0", PORT), LLMProxyHandler) as httpd:
-        print(f"[Proxy] LLM Local Proxy Server running on port {PORT}...")
+    port = int(os.getenv("LLM_PROXY_PORT", PORT))
+    
+    # Clean up any leftover files on startup
+    safe_unlink(REQUEST_FILE)
+    safe_unlink(RESPONSE_FILE)
+    
+    while True:
         try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            print("\n[Proxy] Server stopping...")
+            with socketserver.TCPServer(("0.0.0.0", port), LLMProxyHandler) as httpd:
+                print(f"[Proxy] LLM Local Proxy Server running on port {port}...")
+                httpd.serve_forever()
+            break
+        except OSError as e:
+            # Check for "Address already in use" errors (98 on Unix, 10048 on Windows)
+            if e.errno in (98, 10048):
+                print(f"[Proxy] Port {port} is busy. Trying {port - 1}...")
+                port -= 1
+                if port < 1024:
+                    print("[Proxy] Error: No available ports found above 1024.")
+                    break
+            else:
+                print(f"[Proxy] Server error binding to port {port}: {e}")
+                break
 
 if __name__ == "__main__":
     run_server()

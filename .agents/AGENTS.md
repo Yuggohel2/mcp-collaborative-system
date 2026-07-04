@@ -20,10 +20,13 @@ To optimize native performance and stay strictly within the 8% remaining Gemini 
 - **Rule**: Antigravity must act strictly as **The Brain** (Architect/Planner) when making changes to code files inside the designated project folder. It must **not** directly write code changes to that folder on the host file system.
 - **Rule**: All file updates, terminal command executions, build/test cycles, and debugging actions for code under the designated project folder must be executed inside the sandboxed OpenHands container via the `openhands.execute_bash` tool.
 - **Rule**: When making changes *outside* the designated project folder (such as configuring MCP servers, updating `openhands_mcp.py`, or modifying `AGENTS.md`/`mcp_config.json`), Antigravity must edit files directly on the host using its native file-writing tools (e.g., `replace_file_content`, `write_to_file`) and run local commands directly if needed.
+- **Rule**: **Path Translation:** When analyzing build/test outputs or errors produced inside the Docker container, the agent MUST automatically translate container-space absolute paths (e.g., `/projects/<project-name>/...`) back to host-space paths (e.g., `<PROJECTS_DIR>/<project-name>/...`) before using native file-viewing or editing tools (such as `view_file` or `replace_file_content`).
 
 ## 4. Synchronous Sandbox Execution (No Polling)
 - **Rule**: Commands run inside the sandbox via `openhands.execute_bash` are executed synchronously. Specify an appropriate timeout (default 300s) and handle the result (exit code, stdout, stderr) immediately in your next step.
 - **Rule**: Do **not** run background `sleep` loops or poll task status.
+- **Rule**: **Execution Safety & Hang Prevention:** The agent MUST run background processes, listening ports, or long-running development servers inside the sandbox with non-blocking execution commands (e.g., using `nohup` or `&` in the background). For standard commands, always enforce a strict, short timeout to prevent the connection socket from hanging.
+
 
 ## 5. Summarization and Verification (Only inside the Designated Project Folder)
 - **Rule**: When OpenHands finishes, only request the final diff and a brief test pass summary. Do not output raw build logs or stack traces to the main chat.
