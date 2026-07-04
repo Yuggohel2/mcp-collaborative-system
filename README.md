@@ -1,8 +1,37 @@
 # 🧠 MCP Collaborative System: Brain + Graph + Hands
 
+
 An ultra-efficient, highly collaborative agentic coding framework built using the **Model Context Protocol (MCP)**. This system establishes a division of labor between planning, structural code understanding, and execution, optimizing performance and reducing cost.
 
+## 📐 System Architecture
+
+```mermaid
+graph TD
+    subgraph Host Machine (User Workspace)
+        Brain["🧠 IDE Chat Agent<br>(Planning & Design)"]
+        Proxy["🌉 LLM Local Proxy Server<br>(llm_proxy.py)"]
+        Graph["🧩 code-review-graph<br>(Semantic Index & Deps)"]
+    end
+    subgraph Sandboxed Environment (Docker)
+        Hands["🛡️ OpenHands Sandbox<br>(Isolated Execution)"]
+    end
+
+    Brain -->|"1. Targeted Context"| Graph
+    Brain -->|"2. Design & Plan"| Brain
+    Brain -->|"3. Delegate Code/Test Tasks"| Hands
+    Hands -->|"4. Intercept API Calls (Port 9999)"| Proxy
+    Proxy -->|"5. Translate to Local IPC Files"| Brain
+    Hands -->|"6. Run Compile & Test Loops"| Hands
+```
+
 ---
+
+## 🏷️ Recommended GitHub Repository Topics
+To maximize discoverability, copy and paste these tags into your GitHub repository settings under **Topics**:
+`mcp` `model-context-protocol` `openhands` `ai-agent` `agentic-workflows` `llm-proxy` `developer-tools` `sandbox` `sandbox-security` `code-indexing`
+
+---
+
 
 ## 💻 Supported Clients & IDEs
 
@@ -20,7 +49,7 @@ Since this system is built entirely on the open-standard **Model Context Protoco
 This framework is built using the same design principles that guide enterprise-grade software engineering architectures:
 
 *   **🔑 100% API-Key Free LLM Execution:** Eliminates the need for personal OpenAI, Anthropic, or Gemini API keys to drive OpenHands task execution. The system routes all execution requests directly through your IDE's active built-in model, saving massive API costs.
-*   **🌉 Model-Agnostic LLM Proxy Bridge:** Utilizes a lightweight HTTP server ([llm_proxy.py](file:///d:/AI%20workspace/mcp-collaborative-system/infrastructure/llm_proxy.py)) on port `9999` to intercept standard OpenAI Chat Completion calls from OpenHands and translate them into local files (`llm_request.json` / `llm_response.json`). This allows any model active in your IDE chat (Claude, Gemini, GPT, etc.) to drive the execution loop without modifications.
+*   **🌉 Model-Agnostic LLM Proxy Bridge:** Utilizes a lightweight HTTP server ([llm_proxy.py](file:///d:/AI%20workspace/mcp-collaborative-system/infrastructure/llm_proxy.py)) (default port `9999`, dynamically fallbacks to next free port, and fully customizable via `LLM_PROXY_PORT` environment variables) to intercept standard OpenAI Chat Completion calls from OpenHands and translate them into local files (`llm_request.json` / `llm_response.json`). This allows any model active in your IDE chat (Claude, Gemini, GPT, etc.) to drive the execution loop without modifications.
 *   **🧩 True Separation of Concerns:** Decouples reasoning from execution.
     *   **The Brain (Orchestrator):** The IDE LLM (Gemini/Claude) serves purely as the architect, focusing 100% of its capacity on requirements, planning, and code design.
     *   **The Graph (Code Intelligence):** `code-review-graph` provides codebase analysis, semantic indexing, and dependency trees.
@@ -28,7 +57,7 @@ This framework is built using the same design principles that guide enterprise-g
 *   **📉 90% Token Cost Reduction:** Traditional tools dump entire files and directories into the context window, wasting tokens and causing model confusion. By querying the `code-review-graph` first, the orchestrator retrieves only the minimal, target line ranges required to understand a change.
 *   **🛡️ Isolated "Shift-Left" Sandbox Security:** Running AI-generated code directly on your local system is a major security risk. This system isolates all writes, compiles, and runs inside a secure **Docker container sandbox** (`openhands`). Changes are automatically verified via unit tests inside the sandbox before being written back, keeping your host system safe.
 *   **📋 Persistent Workspace & Session Memory:** Automatically maintains a standard task checklist (`task.md`) in the conversation artifacts directory and project context guidelines (`AGENTS.md`) in the workspace, ensuring the model never forgets the task state between IDE restarts.
-*   **🧹 Sandbox Cleanliness & Verification:** Automatically runs and validates all code changes using unit tests inside the Docker sandbox, and automatically cleans up temporary files post-execution to maintain a pristine codebase.
+*   **🧹 Safe Sandbox Cleanliness & Verification:** Automatically runs and validates all code changes using unit tests inside the Docker sandbox, and automatically cleans up temporary files post-execution. Supports a safe Docker system prune shortcut that deletes builder cache and stopped containers without touching database data volumes.
 *   **🔄 100% Environment Reproducibility:** By using Docker containerization, development environments, compilers, and dependencies are identical for every developer on the team, eliminating local version mismatches and the "works on my machine" problem.
 *   **🔌 IDE & Client Agnosticism:** Built entirely on the open-standard **Model Context Protocol (MCP)**, this system works out-of-the-box across **Cursor**, **VS Code** (Cline/Roo Code), **Antigravity IDE**, **Claude Code (CLI)**, or any other MCP-compliant interface.
 
