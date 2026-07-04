@@ -5,23 +5,19 @@ An ultra-efficient, highly collaborative agentic coding framework built using th
 
 ## 📐 System Architecture
 
-<style>
-  @keyframes dash {
-    to {
-      stroke-dashoffset: -20;
-    }
-  }
-</style>
-
 ```mermaid
 flowchart TB
+    %% Inject CSS animation directly inside the SVG DOM to bypass GitHub/IDE sandboxing
+    styleNode["<style>@keyframes dash { to { stroke-dashoffset: -20; } }</style>"]
+    style styleNode fill:none,stroke:none,width:0,height:0,color:transparent,display:none;
+
     subgraph Host ["💻 Host Machine (Local Workspace)"]
         direction TB
         Brain["🧠 IDE Chat Agent (The Brain)"]
         Graph["🧩 code-review-graph (The Graph)"]
         Proxy["🌉 LLM Local Proxy (The Bridge)"]
     end
-    subgraph Sandbox ["🛡️ Docker Container (Execution)"]
+    subgraph Sandbox ["🛡️ Docker Sandbox (Execution)"]
         Hands["⚙️ OpenHands Sandbox (The Hands)"]
     end
 
@@ -30,10 +26,10 @@ flowchart TB
     Hands -->|3. Intercept LLM Calls| Proxy
     Proxy -->|4. Return Local Response| Brain
 
-    linkStyle 0 stroke:#2b6cb0,stroke-width:3px,stroke-dasharray:5,animation:dash 1s linear infinite;
-    linkStyle 1 stroke:#2b6cb0,stroke-width:3px,stroke-dasharray:5,animation:dash 1s linear infinite;
     linkStyle 2 stroke:#2b6cb0,stroke-width:3px,stroke-dasharray:5,animation:dash 1s linear infinite;
     linkStyle 3 stroke:#2b6cb0,stroke-width:3px,stroke-dasharray:5,animation:dash 1s linear infinite;
+    linkStyle 4 stroke:#2b6cb0,stroke-width:3px,stroke-dasharray:5,animation:dash 1s linear infinite;
+    linkStyle 5 stroke:#2b6cb0,stroke-width:3px,stroke-dasharray:5,animation:dash 1s linear infinite;
 ```
 
 ---
