@@ -1,4 +1,4 @@
-# 🧠 MCP Collaborative System: Brain + Graph + Hands
+# 🦁 Hercules-MCP: Divined by the Brain, runed by the Graph, forged by the Hands
 
 
 An ultra-efficient, highly collaborative agentic coding framework built using the **Model Context Protocol (MCP)**. This system establishes a division of labor between planning, structural code understanding, and execution, optimizing performance and reducing cost.
@@ -132,7 +132,7 @@ The agent will automatically detect your setup and configure the MCP servers for
 
 ### 📋 Copy-Paste Onboarding Prompt:
 ```markdown
-Please help me bootstrap my local MCP Collaborative System. Follow these steps to configure the environment:
+Please help me bootstrap my local Hercules-MCP system. Follow these steps to configure the environment:
 
 1. Detect the absolute path of this workspace on my computer.
 2. Detect which IDE or agent extension we are currently running in (e.g., Antigravity IDE, VS Code with Cline/Roo Code, Claude Desktop, or Cursor).
@@ -204,7 +204,7 @@ Once you have completed the onboarding setup, you can test that the entire syste
 Copy and paste this prompt into your agentic chat window:
 
 ```markdown
-Let's run a verification test for our MCP Collaborative System. Please execute the following steps:
+Let's run a verification test for our Hercules-MCP system. Please execute the following steps:
 
 1. Create a new directory in our workspace called `verification_test`.
 2. Inside it, create a Python script with a deliberate logic bug (e.g., a function that is supposed to calculate fibonacci numbers but has an incorrect recursion base case).
