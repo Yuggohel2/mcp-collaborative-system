@@ -5,27 +5,11 @@ An ultra-efficient, highly collaborative agentic coding framework built using th
 
 ## 📐 System Architecture
 
-<style>
-  @keyframes flowchart-dash {
-    to {
-      stroke-dashoffset: -20;
-    }
-  }
-  .mermaid svg .edgePath path,
-  .mermaid svg .edgePaths path,
-  .mermaid svg .edgePath .path,
-  .mermaid svg path.edgePath,
-  .mermaid svg .flowchart-link,
-  .mermaid svg .edgePaths .edgePath {
-    stroke: #2b6cb0 !important;
-    stroke-width: 3px !important;
-    stroke-dasharray: 5 !important;
-    animation: flowchart-dash 1s linear infinite !important;
-  }
-</style>
-
 ```mermaid
 flowchart TB
+    styleNode["<style>@keyframes dash { to { stroke-dashoffset: -20; } } .edgePath .path, .edgePath path, .flowchart-link { stroke: #2b6cb0 !important; stroke-width: 3px !important; stroke-dasharray: 5 !important; animation: dash 1s linear infinite !important; } .edgePath .arrowheadPath, .marker, marker { fill: #2b6cb0 !important; stroke: #2b6cb0 !important; }</style>"]
+    style styleNode fill:none,stroke:none,stroke-width:0px;
+
     subgraph Host ["💻 Host Machine (Local Workspace)"]
         direction TB
         Brain["🧠 IDE Chat Agent (The Brain)"]
