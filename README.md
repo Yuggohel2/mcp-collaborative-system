@@ -6,6 +6,11 @@ An ultra-efficient, highly collaborative agentic coding framework built using th
 ## 📐 System Architecture
 
 ```mermaid
+---
+config:
+  themeVariables:
+    fontFamily: "system-ui, -apple-system, sans-serif"
+---
 flowchart TD
     subgraph Host ["💻 Host Machine (Local Workspace)"]
         Brain["🧠 IDE Chat Agent (The Brain)"]
@@ -21,10 +26,10 @@ flowchart TD
     Hands -->|"3. Intercept LLM Calls"| Proxy
     Proxy -->|"4. Return Local Response"| Brain
 
-    style Brain fill:#1e293b,stroke:#38bdf8,stroke-width:1.5px,color:#f8fafc
-    style Graph fill:#1e293b,stroke:#2dd4bf,stroke-width:1.5px,color:#f8fafc
-    style Proxy fill:#1e293b,stroke:#818cf8,stroke-width:1.5px,color:#f8fafc
-    style Hands fill:#1e293b,stroke:#fb7185,stroke-width:1.5px,color:#f8fafc
+    style Brain fill:#1e293b,stroke:#38bdf8,stroke-width:1.5px,color:#f8fafc,font-family:system-ui
+    style Graph fill:#1e293b,stroke:#2dd4bf,stroke-width:1.5px,color:#f8fafc,font-family:system-ui
+    style Proxy fill:#1e293b,stroke:#818cf8,stroke-width:1.5px,color:#f8fafc,font-family:system-ui
+    style Hands fill:#1e293b,stroke:#fb7185,stroke-width:1.5px,color:#f8fafc,font-family:system-ui
     
     style Host fill:none,stroke:#475569,stroke-width:1.5px
     style Sandbox fill:none,stroke:#fb7185,stroke-width:1.5px,stroke-dasharray: 5 5
