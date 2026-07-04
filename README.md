@@ -165,6 +165,7 @@ Let's run a verification test for our MCP Collaborative System. Please execute t
    - The original broken code vs. the fixed code.
    - The verification test status.
    - An estimate of the token context saved by using the graph-targeted lookup rather than passing the whole file/directory into the context window.
+6. Delete the `verification_test` directory (or clean up its Python files) to keep the repository clean after the server has successfully passed the tests.
 ```
 
 ### Expected Results:
