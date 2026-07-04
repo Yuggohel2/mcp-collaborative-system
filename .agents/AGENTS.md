@@ -7,6 +7,7 @@ To optimize native performance and stay strictly within the 8% remaining Gemini 
   1. The **workspace root path** (e.g., `D:/AI workspace`).
   2. The **designated project folder name** (e.g., `Projects/` or any custom folder where their software application files live).
   3. The **IDE / Agent client** in use (Antigravity IDE, Cursor, Claude Code, or VS Code with Cline/Roo Code).
+- **Rule**: If either folder does not exist, the agent must ask the user what to name them and create them. If they already exist, the agent must dynamically detect and connect them.
 - **Rule**: The agent must automatically write the detected/configured paths (`WORKSPACE_ROOT` and `PROJECTS_DIR`) into the `env` section of the `openhands` server configuration in `mcp_config.json` (or the equivalent client settings file) to ensure the collaborative tools are correctly scoped.
 
 ## 2. Graph-First Codebase Analysis (Only inside the Designated Project Folder)
