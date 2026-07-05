@@ -106,34 +106,37 @@ class LLMProxyHandler(http.server.BaseHTTPRequestHandler):
                         time.sleep(0.2)
                 time.sleep(0.5)
 
-            if response_data:
-                print("[Proxy] Received response from orchestrator. Sending to OpenHands.")
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self.send_header("Access-Control-Allow-Origin", "*")
-                self.end_headers()
-                self.wfile.write(json.dumps(response_data).encode('utf-8'))
-            else:
-                print("[Proxy] Timeout waiting for orchestrator response.")
-                safe_unlink(request_file)
-                self.send_response(504)
-                self.send_header("Content-Type", "application/json")
-                self.end_headers()
-                error_resp = {
-                    "error": {
-                        "message": "Gateway Timeout: Orchestrator agent did not respond in time.",
-                        "type": "gateway_timeout",
-                        "code": 504
+            try:
+                if response_data:
+                    print("[Proxy] Received response from orchestrator. Sending to OpenHands.")
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/json")
+                    self.send_header("Access-Control-Allow-Origin", "*")
+                    self.end_headers()
+                    self.wfile.write(json.dumps(response_data).encode('utf-8'))
+                else:
+                    print("[Proxy] Timeout waiting for orchestrator response.")
+                    safe_unlink(request_file)
+                    self.send_response(504)
+                    self.send_header("Content-Type", "application/json")
+                    self.end_headers()
+                    error_resp = {
+                        "error": {
+                            "message": "Gateway Timeout: Orchestrator agent did not respond in time.",
+                            "type": "gateway_timeout",
+                            "code": 504
+                        }
                     }
-                }
-                self.wfile.write(json.dumps(error_resp).encode('utf-8'))
+                    self.wfile.write(json.dumps(error_resp).encode('utf-8'))
+            except OSError as e:
+                print(f"[Proxy] Client disconnected before response could be sent: {e}")
         else:
             self.send_response(404)
             self.end_headers()
 
 def run_server():
     # Allow address reuse to prevent "Address already in use" errors on restarts
-    socketserver.TCPServer.allow_reuse_address = True
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
     default_port = PORT
     port = int(os.getenv("LLM_PROXY_PORT", default_port))
     
@@ -149,7 +152,7 @@ def run_server():
     
     while True:
         try:
-            with socketserver.TCPServer(("0.0.0.0", port), LLMProxyHandler) as httpd:
+            with socketserver.ThreadingTCPServer(("0.0.0.0", port), LLMProxyHandler) as httpd:
                 print(f"[Proxy] LLM Local Proxy Server running on port {port}...")
                 if port != default_port:
                     print(f"\n[WARNING] Bound to custom port {port} instead of default {default_port}!")

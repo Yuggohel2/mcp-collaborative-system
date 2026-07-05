@@ -83,6 +83,30 @@ def get_headers() -> dict:
         "Content-Type": "application/json"
     }
 
+def resolve_projects_dir() -> Path:
+    """Resolve the host Projects directory dynamically with sibling folder fallbacks."""
+    # 1. Check environment variable first
+    projects_env = os.getenv("PROJECTS_DIR")
+    if projects_env:
+        return Path(projects_env).resolve()
+
+    workspace_root = os.getenv("WORKSPACE_ROOT")
+    if workspace_root:
+        return (Path(workspace_root) / "Projects").resolve()
+
+    # 2. Fallback: Check parent and grandparent sibling folder locations relative to this script
+    script_dir = Path(__file__).parent.resolve()  # <WORKSPACE_ROOT>/hercules-mcp/infrastructure
+    repo_root = script_dir.parent.resolve()       # <WORKSPACE_ROOT>/hercules-mcp
+    
+    # Try <WORKSPACE_ROOT>/Projects (sibling to hercules-mcp repo)
+    sibling_projects = repo_root.parent / "Projects"
+    if sibling_projects.exists():
+        return sibling_projects.resolve()
+        
+    # Try <WORKSPACE_ROOT>/hercules-mcp/Projects (fallback)
+    local_projects = repo_root / "Projects"
+    return local_projects.resolve()
+
 def map_workspace_path(host_path: str) -> str:
     """
     Map host workspace path under PROJECTS_DIR to container path.
@@ -92,8 +116,7 @@ def map_workspace_path(host_path: str) -> str:
     normalized = host_path.replace("\\", "/").rstrip("/")
     
     # Resolve host project directory dynamically (supports other machines)
-    workspace_root = os.getenv("WORKSPACE_ROOT", str(Path(__file__).parent.parent.resolve()))
-    projects_dir = os.getenv("PROJECTS_DIR", str(Path(workspace_root) / "Projects"))
+    projects_dir = str(resolve_projects_dir())
     prefix_host = projects_dir.replace("\\", "/").lower().rstrip("/")
     
     if normalized.lower().startswith(prefix_host):
@@ -335,8 +358,7 @@ def watch_projects_folder():
     and automatically registers them.
     """
     # Use standard host path location matching map_workspace_path
-    workspace_root = os.getenv("WORKSPACE_ROOT", str(Path(__file__).parent.parent.resolve()))
-    projects_dir = Path(os.getenv("PROJECTS_DIR", str(Path(workspace_root) / "Projects"))).resolve()
+    projects_dir = resolve_projects_dir()
     if not projects_dir.exists():
         logger.warning(f"Projects directory {projects_dir} does not exist. Auto-registration watcher stopped.")
         return
