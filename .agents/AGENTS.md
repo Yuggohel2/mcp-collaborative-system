@@ -54,4 +54,9 @@ To optimize native performance and stay strictly within the 8% remaining Gemini 
 - **Rule**: Only push changes to the remote GitHub repository when the user explicitly instructs you to do so.
 
 
+## 9. Dynamic LLM Proxy Handling
+- **Rule**: When executing task canvas processes or intercepting OpenHands requests, the agent must check the user's home `.openhands/` directory (e.g., `~/.openhands/` or resolved dynamically via `Path.home() / ".openhands"`) for any incoming requests matching the pattern `llm_request_<id>.json`.
+- **Rule**: For each discovered request file, extract the unique `<id>` string from the filename, read its JSON payload, call the appropriate LLM completion, and save the result directly to `llm_response_<id>.json` in the same directory. Once written, ensure files are cleaned up or unlinked to prevent stale state.
+
+
 

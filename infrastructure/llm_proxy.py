@@ -3,14 +3,13 @@ import socketserver
 import json
 import os
 import time
+import uuid
 from pathlib import Path
 from typing import Any
 
 PORT = 9999
 USER_DIR = Path.home()
 OPENHANDS_DIR = USER_DIR / ".openhands"
-REQUEST_FILE = OPENHANDS_DIR / "llm_request.json"
-RESPONSE_FILE = OPENHANDS_DIR / "llm_response.json"
 
 def safe_write_json(file_path: Path, data: Any):
     """Write JSON file with safety retries to prevent Windows locking/access errors."""
@@ -73,20 +72,21 @@ class LLMProxyHandler(http.server.BaseHTTPRequestHandler):
             # Ensure directory exists
             OPENHANDS_DIR.mkdir(parents=True, exist_ok=True)
             
-            # Clean up old files if they exist to prevent reading stale requests
-            safe_unlink(REQUEST_FILE)
-            safe_unlink(RESPONSE_FILE)
+            # Generate unique request/response ID to support concurrent sessions
+            req_id = str(uuid.uuid4())[:8]
+            request_file = OPENHANDS_DIR / f"llm_request_{req_id}.json"
+            response_file = OPENHANDS_DIR / f"llm_response_{req_id}.json"
 
             # Save request to file safely
             try:
-                safe_write_json(REQUEST_FILE, payload)
+                safe_write_json(request_file, payload)
             except Exception as e:
                 self.send_response(500)
                 self.end_headers()
                 self.wfile.write(f"Failed to write request file: {e}".encode())
                 return
             
-            print(f"[Proxy] Saved request to {REQUEST_FILE}. Waiting for orchestrator response...")
+            print(f"[Proxy] Saved request to {request_file}. Waiting for orchestrator response...")
 
             # Wait for response file
             timeout = 180  # 3 minutes timeout
@@ -94,12 +94,13 @@ class LLMProxyHandler(http.server.BaseHTTPRequestHandler):
             response_data = None
             
             while time.time() - start_time < timeout:
-                if RESPONSE_FILE.exists():
+                if response_file.exists():
                     try:
                         # Add a tiny delay to ensure file write is completed by orchestrator
                         time.sleep(0.1)
-                        response_data = safe_read_json(RESPONSE_FILE)
-                        safe_unlink(RESPONSE_FILE)
+                        response_data = safe_read_json(response_file)
+                        safe_unlink(response_file)
+                        safe_unlink(request_file)
                         break
                     except Exception:
                         time.sleep(0.2)
@@ -114,6 +115,7 @@ class LLMProxyHandler(http.server.BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps(response_data).encode('utf-8'))
             else:
                 print("[Proxy] Timeout waiting for orchestrator response.")
+                safe_unlink(request_file)
                 self.send_response(504)
                 self.send_header("Content-Type", "application/json")
                 self.end_headers()
@@ -136,8 +138,14 @@ def run_server():
     port = int(os.getenv("LLM_PROXY_PORT", default_port))
     
     # Clean up any leftover files on startup
-    safe_unlink(REQUEST_FILE)
-    safe_unlink(RESPONSE_FILE)
+    if OPENHANDS_DIR.exists():
+        for f in OPENHANDS_DIR.glob("llm_request_*.json"):
+            safe_unlink(f)
+        for f in OPENHANDS_DIR.glob("llm_response_*.json"):
+            safe_unlink(f)
+        # Clean up legacy static files if they exist
+        safe_unlink(OPENHANDS_DIR / "llm_request.json")
+        safe_unlink(OPENHANDS_DIR / "llm_response.json")
     
     while True:
         try:
