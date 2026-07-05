@@ -134,11 +134,43 @@ class LLMProxyHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
+def kill_process_on_port(port: int):
+    """Attempt to terminate any process currently occupying the proxy port."""
+    import subprocess
+    try:
+        if os.name == "nt":
+            # Windows: Find and kill the PID on the target port
+            output = subprocess.check_output(f"netstat -aon | findstr LISTENING | findstr :{port}", shell=True).decode()
+            for line in output.strip().split("\n"):
+                parts = line.strip().split()
+                if len(parts) >= 5 and parts[1].endswith(f":{port}"):
+                    pid = parts[-1]
+                    # Don't kill our own process
+                    if int(pid) != os.getpid():
+                        print(f"[Proxy] Terminating occupying process {pid} on port {port}...")
+                        subprocess.run(f"taskkill /F /PID {pid}", shell=True, capture_output=True)
+                        time.sleep(0.5)  # Give the OS time to release the port
+        else:
+            # Unix/macOS: Use lsof and kill
+            output = subprocess.check_output(f"lsof -t -i:{port}", shell=True).decode()
+            for pid in output.strip().split("\n"):
+                if pid and int(pid) != os.getpid():
+                    print(f"[Proxy] Terminating occupying process {pid} on port {port}...")
+                    subprocess.run(f"kill -9 {pid}", shell=True, capture_output=True)
+                    time.sleep(0.5)
+    except Exception:
+        # Fail silently if commands are missing or permission is denied
+        pass
+
 def run_server():
-    # Allow address reuse to prevent "Address already in use" errors on restarts
-    socketserver.ThreadingTCPServer.allow_reuse_address = True
     default_port = PORT
     port = int(os.getenv("LLM_PROXY_PORT", default_port))
+    
+    # Attempt to kill any orphaned proxy or occupying process on startup
+    kill_process_on_port(port)
+    
+    # Allow address reuse to prevent "Address already in use" errors on restarts
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
     
     # Clean up any leftover files on startup
     if OPENHANDS_DIR.exists():
