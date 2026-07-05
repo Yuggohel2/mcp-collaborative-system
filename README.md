@@ -148,11 +148,11 @@ This workspace is structured using a **two-tier file architecture** designed to 
 1.  **🌌 System Root (`WORKSPACE_ROOT`)**:
     *   This is the main parent directory of your workspace (e.g., `D:/AI workspace`).
     *   **Contents**: Contains the `hercules-mcp` repository, global rulebook (`.agents/AGENTS.md`), general MCP server configurations (`mcp_config.json`), and the global persistent log file ([task.md](file:///d:/AI%20workspace/task.md)).
-    *   **Purpose**: Tracks system-level setup, tool versions, and rule adjustments across all session lifetimes.
+    *   **Purpose**: Tracks system-level setup, tool versions, and rule adjustments across all session lifetimes. Capped at 30,000 words; archives to `WORKSPACE_ROOT/task_archive.md`.
 2.  **📁 Projects Directory (`PROJECTS_DIR`)**:
     *   This is a dedicated subfolder directly under the System Root (default name `Projects/`, e.g., `D:/AI workspace/Projects`).
     *   **Contents**: Contains your individual coding projects, apps, and software repositories (e.g., `ML_PROJECT-1/`, `auto-test-mcp/`).
-    *   **Purpose**: Each folder here maintains its own local isolated `task.md` checklist, ensuring the active agent never confuses project code changes with system configuration updates.
+    *   **Purpose**: Each folder here maintains its own local isolated `task.md` checklist, ensuring the active agent never confuses project code changes with system configuration updates. Each project-level `task.md` has its own independent 30,000-word cap and archives locally to that specific project's own `task_archive.md` (e.g., `Projects/ML_PROJECT-1/task_archive.md`), isolating task history per codebase.
 
 ---
 
