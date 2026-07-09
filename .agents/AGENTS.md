@@ -76,3 +76,9 @@ To optimize native performance and stay strictly within the 8% remaining Gemini 
 - **Rule**: **Quiet & Targeted Testing:** When executing unit or integration tests, always run them with the quiet flag (e.g., `pytest -q`) or target specific test files/functions directly rather than running the full verbose suite. This prevents long test execution logs from blobbing the context window.
 - **Rule**: **Graph-Based File Reading:** Always use the `code-review-graph` server to identify the exact line ranges for target code symbols (classes, functions) first, and read only that range via `view_file`. Avoid reading full files over 150 lines.
 - **Rule**: **No Manual/Command Polling Loops:** Never run shell loops containing `sleep` (e.g., `while true; do sleep 5; done`) or submit consecutive check commands (e.g. repeatedly checking process status in separate turns) to wait for background tasks. Instead, launch background jobs and let the agent turn go idle. The system's reactive wakeup mechanism will notify and resume the session automatically when the task finishes.
+
+## 13. Mandatory AGENTS.md Compliance
+- **Rule**: Every session, strictly follow ALL rules in `.agents/AGENTS.md` without exception. Read and internalize them before taking any action.
+- **Rule**: At session start, build or update the `code-review-graph` for the active project before doing any code analysis. Always query the graph first to locate files and understand dependencies — never use `grep_search` or recursive `list_dir` to explore codebase structure.
+- **Rule**: For complex multi-file changes inside the project folder (new module integrations, multi-file refactors), delegate implementation to OpenHands. Only write directly for simple single-file creations or trivial edits.
+- **Rule**: The AGENTS.md rules are non-negotiable — never skip or shortcut them for convenience.
