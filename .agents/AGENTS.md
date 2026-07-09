@@ -66,3 +66,13 @@ To optimize native performance and stay strictly within the 8% remaining Gemini 
 
 ## 10. Rules Compliance & Mandatory Startup Check
 - **Rule**: At the start of every session (the very first turn), the agent MUST read `.agents/AGENTS.md` in the workspace root and the active project's `task.md` (if in a project subdirectory) or workspace root `task.md` to ensure complete alignment with project-specific rules, constraints, and current state. The agent must never proceed with executing commands or answering user questions without validating this state.
+
+## 11. Browser Subagent Permission Constraint
+- **Rule**: The agent MUST NEVER invoke the `browser_subagent` tool or spawn any browser automation subagent without explicit written permission or instruction from the user. Even for visual verification or layout testing of styling edits, the agent should instruct the user to verify on their end instead of running the browser subagent automatically.
+
+## 12. Token-Saving Search, Listing, and Testing Constraints
+- **Rule**: **No Recursive Listings:** Never run recursive directory listings (`list_dir`) on the project root or directories containing deep dependencies (such as `node_modules`, `.venv`, `.git`). Always scope listings to immediate target folders.
+- **Rule**: **Filtered Search:** When performing text searches via `grep_search`, always use specific query terms and apply target folder or file extension filters (e.g., `Includes=["*.py"]`) to limit matching lines. Avoid broad global searches without filters.
+- **Rule**: **Quiet & Targeted Testing:** When executing unit or integration tests, always run them with the quiet flag (e.g., `pytest -q`) or target specific test files/functions directly rather than running the full verbose suite. This prevents long test execution logs from blobbing the context window.
+- **Rule**: **Graph-Based File Reading:** Always use the `code-review-graph` server to identify the exact line ranges for target code symbols (classes, functions) first, and read only that range via `view_file`. Avoid reading full files over 150 lines.
+- **Rule**: **No Manual/Command Polling Loops:** Never run shell loops containing `sleep` (e.g., `while true; do sleep 5; done`) or submit consecutive check commands (e.g. repeatedly checking process status in separate turns) to wait for background tasks. Instead, launch background jobs and let the agent turn go idle. The system's reactive wakeup mechanism will notify and resume the session automatically when the task finishes.
