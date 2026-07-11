@@ -82,3 +82,6 @@ To optimize native performance and stay strictly within the 8% remaining Gemini 
 - **Rule**: At session start, build or update the `code-review-graph` for the active project before doing any code analysis. Always query the graph first to locate files and understand dependencies — never use `grep_search` or recursive `list_dir` to explore codebase structure.
 - **Rule**: For complex multi-file changes inside the project folder (new module integrations, multi-file refactors), delegate implementation to OpenHands. Only write directly for simple single-file creations or trivial edits.
 - **Rule**: The AGENTS.md rules are non-negotiable — never skip or shortcut them for convenience.
+
+## 14. Leverage Agent Swarms (Parallel Execution) When Feasible
+- **Rule**: Whenever tasks are decoupled and have no linear dependencies (such as parallel testing, parallel security/performance code reviews, or independent feature development on separate branches), the agent should design and leverage parallel agent swarms or concurrent execution loops rather than default to sequential operations. Apply this organically and systematically across current and future projects.
